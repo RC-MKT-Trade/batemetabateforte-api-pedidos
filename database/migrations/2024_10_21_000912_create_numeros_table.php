@@ -16,6 +16,7 @@ return new class extends Migration
             $table->bigInteger('serial');
             $table->boolean('isActive');
             $table->bigInteger('idPedido');
+            $table->timestamps();
         });
     }
 

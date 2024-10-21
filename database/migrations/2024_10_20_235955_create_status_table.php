@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('status', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('data');
-            $table->integer('status');
+            $table->dateTime('data');
+            $table->string('status');
             $table->bigInteger('idPedido');
+            $table->timestamps();
         });
     }
 

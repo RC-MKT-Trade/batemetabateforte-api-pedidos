@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('quantProdutoCaixa');
             $table->decimal('valorProdutoUnidade', 8, 2);
             $table->decimal('valorTotalProduto', 8, 2);
+            $table->timestamps();
         });
     }
 

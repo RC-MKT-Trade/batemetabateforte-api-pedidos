@@ -22,9 +22,11 @@ return new class extends Migration
             $table->string('dataPedido');
             $table->decimal('valorTotalPedido');
             $table->string('canalVenda');
-            $table->string('segmeto');
-            $table->datetime('criadoEm');
-            $table->datetime('atualizadoEm');
+            $table->string('segmento');
+            $table->datetime('criadoEm')->nullable()->default(NULL);;
+            $table->datetime('atualizadoEm')->nullable()->default(NULL);;
+            $table->timestamps();
+
         });
     }
 
