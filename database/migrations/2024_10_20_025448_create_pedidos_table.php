@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('valorTotalPedido');
             $table->string('canalVenda');
             $table->string('segmeto');
-            $table->string('criadoEm');
+            $table->datetime('criadoEm');
             $table->datetime('atualizadoEm');
         });
     }
