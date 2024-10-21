@@ -14,4 +14,4 @@ docker run --rm \
 
 
 #### ./vendor/bin/sail up
-#### ./vendor/bin/sail artisan migrate
+#### ./vendor/bin/sail php artisan migrate
