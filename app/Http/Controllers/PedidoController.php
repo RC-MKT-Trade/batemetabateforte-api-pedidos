@@ -140,7 +140,7 @@ class PedidoController extends Controller
 
         // Retorna uma resposta de sucesso
         return response()->json([
-            'message' => 'teste',
+            'message' => 'Pedido cadastrado/atualizado com sucesso',
         ], 200);
     }
 }
