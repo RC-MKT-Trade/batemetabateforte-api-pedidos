@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('pedidos', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('statusCompra');
-            $table->bigInteger('codCliente');
-            $table->integer('cnpjCliente');
-            $table->integer('cnpjFilialBf');
-            $table->integer('codRca');
-            $table->mediumInteger('numPedido');
+            $table->string('codCliente');
+            $table->string('cnpjCliente');
+            $table->string('cnpjFilialBf');
+            $table->string('codRca');
+            $table->string('numPedido');
             $table->string('dataPedido');
-            $table->decimal('valorTotalPedido');
+            $table->string('valorTotalPedido');
             $table->string('canalVenda');
             $table->string('segmento');
             $table->datetime('criadoEm')->nullable()->default(NULL);;
