@@ -24,7 +24,7 @@ class PedidoController extends Controller
             'dataPedido' => 'required|date',
             'valorTotalPedido' => 'required|numeric',
             'canalVenda' => 'required|string',
-            'segmeto' => 'required|string',
+            'segmento' => 'required|string',
             'chaveSefaz' => 'required|array',
             'chaveSefaz.*.id' => 'required|string',
             'chaveSefaz.*.itens' => 'required|array',
@@ -62,7 +62,7 @@ class PedidoController extends Controller
                 'dataPedido' => $data['dataPedido'],
                 'valorTotalPedido' => $data['valorTotalPedido'],
                 'canalVenda' => $data['canalVenda'],
-                'segmento' => $data['segmeto'],
+                'segmento' => $data['segmento'],
                 'criadoEm' => now(),
             ]);
             $pedido->save();
@@ -83,7 +83,7 @@ class PedidoController extends Controller
                 'dataPedido' => $data['dataPedido'],
                 'valorTotalPedido' => $data['valorTotalPedido'],
                 'canalVenda' => $data['canalVenda'],
-                'segmento' => $data['segmeto'],
+                'segmento' => $data['segmento'],
                 'atualizadoEm' => now(),
             ]);
             $pedido->save(); // Salva as atualizações se houver alterações
