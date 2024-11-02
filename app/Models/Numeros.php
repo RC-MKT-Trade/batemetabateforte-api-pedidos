@@ -13,6 +13,5 @@ class Numeros extends Model
         'serial',
         'isActive',
         'idPedido',
-
     ];
 }
