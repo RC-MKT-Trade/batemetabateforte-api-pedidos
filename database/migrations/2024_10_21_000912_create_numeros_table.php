@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('numeros', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('serial');
-            $table->boolean('isActive');
-            $table->bigInteger('idPedido');
+            $table->boolean('isActive')->default(true);
+            $table->bigInteger('idPedido')->nullable();
+            $table->bigInteger('idCliente')->nullable();
+            $table->bigInteger('idMeta')->nullable();
             $table->timestamps();
         });
     }
