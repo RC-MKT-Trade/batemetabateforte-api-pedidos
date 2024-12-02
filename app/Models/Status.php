@@ -11,6 +11,7 @@ class Status extends Model
     protected $fillable = [
         'data',
         'status',
+        'valorTotal',
         'idPedido',
     ];
 }
