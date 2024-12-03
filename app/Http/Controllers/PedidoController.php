@@ -87,14 +87,14 @@ class PedidoController extends Controller
                     'idPedido' => $pedido->id,
                     'status' => $data['statusCompra'],
                     'valorTotal' => $valorTotal ?? 0,
-                    'data' => now(),
+                    'data' => $data['dataPedido'] ?? now(),
                 ]);
             } else {
                 Status::create([
                     'idPedido' => $pedido->id,
                     'status' => $data['statusCompra'],
                     'valorTotal' => $data['valorTotalPedido'] ?? 0,
-                    'data' => now(),
+                    'data' => $data['dataPedido'] ?? now(),
                 ]);
             }
         } else {
@@ -134,14 +134,14 @@ class PedidoController extends Controller
                         'idPedido' => $pedido->id,
                         'status' => $data['statusCompra'],
                         'valorTotal' => $valorTotal ?? 0,
-                        'data' => now(),
+                        'data' => $data['dataPedido'] ?? now(),
                     ]);
                 } else {
                     Status::create([
                         'idPedido' => $pedido->id,
                         'status' => $data['statusCompra'],
                         'valorTotal' => $data['valorTotalPedido'] ?? 0,
-                        'data' => now(),
+                        'data' => $data['dataPedido'] ?? now(),
                     ]);
                 }
             }
