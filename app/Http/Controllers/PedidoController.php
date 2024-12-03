@@ -111,7 +111,7 @@ class PedidoController extends Controller
         }
 
         if ($data['statusCompra'] == 'devolucao_parcial') {
-            $statusId = Status::where('status', 'devolucao_parcial')->orderBy('data', 'desc')->first()->id;
+            $statusId = Status::where('status', 'devolucao_parcial')->where('idPedido', $pedido->id)->orderBy('data', 'desc')->first()->id;
 
             foreach ($itensExistentes as $item) {
                 HistoricItens::create([
@@ -121,6 +121,17 @@ class PedidoController extends Controller
 
                 $item->delete();
             }
+            
+            $statusFaturado = Status::where('status', 'faturado')->where('idPedido', $pedido->id)->orderBy('data', 'desc')->first();
+
+            $valorTotalSaldo = floatval($statusFaturado->valorTotal) - floatval($data['valorTotalPedido']);
+
+            Status::create([
+                'idPedido' => $pedido->id,
+                'status' =>  "saldo_entregue",
+                'valorTotal' => $valorTotalSaldo,
+                'data' => $data['dataPedido'] ?? now(),
+            ]);
 
         } else {
             // Atualiza ou cria os itens associados ao pedido
