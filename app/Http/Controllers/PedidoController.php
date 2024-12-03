@@ -67,36 +67,14 @@ class PedidoController extends Controller
                 'criadoEm' => now(),
             ]);
             $pedido->save();
-            // Salvar o status inicial do pedido
-            if ($data['statusCompra'] == 'devolucao_parcial') {
-                // pegar o valor total do pedido anterior
-                $statusAnterior = Status::where('idPedido', $pedido->id)->orderBy('data', 'desc')->first();
-                $valorTotalAnterior = $statusAnterior->valorTotal;
 
-                // percorre todos os itens enviados no payload e soma o valor dos produtos cancelados
-                $valorSomatoriaProdutosCancelados = 0;
-                foreach ($data['chaveSefaz'] as $chave) {
-                    foreach ($chave['itens'] as $itemData) {
-                        $valorSomatoriaProdutosCancelados += floatval($itemData['valorTotalProduto']);
-                    }
-                }
-
-                $valorTotal = floatval($valorTotalAnterior) - floatval(value: $valorSomatoriaProdutosCancelados);
-
-                Status::create([
-                    'idPedido' => $pedido->id,
-                    'status' => $data['statusCompra'],
-                    'valorTotal' => $valorTotal ?? 0,
-                    'data' => $data['dataPedido'] ?? now(),
-                ]);
-            } else {
-                Status::create([
-                    'idPedido' => $pedido->id,
-                    'status' => $data['statusCompra'],
-                    'valorTotal' => $data['valorTotalPedido'] ?? 0,
-                    'data' => $data['dataPedido'] ?? now(),
-                ]);
-            }
+            Status::create([
+                'idPedido' => $pedido->id,
+                'status' => $data['statusCompra'],
+                'valorTotal' => $data['valorTotalPedido'] ?? 0,
+                'data' => $data['dataPedido'] ?? now(),
+            ]);
+            
         } else {
             // Verifica e atualiza campos que têm dados novos
             $pedido->fill([
@@ -115,88 +93,73 @@ class PedidoController extends Controller
 
             // Salva o novo status na tabela status_pedido se o status foi atualizado
             if ($pedido->wasChanged('statusCompra')) {
-                if ($data['statusCompra'] == 'devolucao_parcial') {
-                    // pegar o valor total do pedido anterior
-                    $statusAnterior = Status::where('idPedido', $pedido->id)->orderBy('data', 'desc')->first();
-                    $valorTotalAnterior = $statusAnterior->valorTotal;
-
-                    // percorre todos os itens enviados no payload e soma o valor dos produtos cancelados
-                    $valorSomatoriaProdutosCancelados = 0;
-                    foreach ($data['chaveSefaz'] as $chave) {
-                        foreach ($chave['itens'] as $itemData) {
-                            $valorSomatoriaProdutosCancelados += floatval($itemData['valorTotalProduto']);
-                        }
-                    }
-
-                    $valorTotal = floatval($valorTotalAnterior) - floatval(value: $valorSomatoriaProdutosCancelados);
-
-                    Status::create([
-                        'idPedido' => $pedido->id,
-                        'status' => $data['statusCompra'],
-                        'valorTotal' => $valorTotal ?? 0,
-                        'data' => $data['dataPedido'] ?? now(),
-                    ]);
-                } else {
-                    Status::create([
-                        'idPedido' => $pedido->id,
-                        'status' => $data['statusCompra'],
-                        'valorTotal' => $data['valorTotalPedido'] ?? 0,
-                        'data' => $data['dataPedido'] ?? now(),
-                    ]);
-                }
+                Status::create([
+                    'idPedido' => $pedido->id,
+                    'status' => $data['statusCompra'],
+                    'valorTotal' => $data['valorTotalPedido'] ?? 0,
+                    'data' => $data['dataPedido'] ?? now(),
+                ]);
             }
         }
 // Recupera todos os itens atuais associados ao pedido
         $itensExistentes = Itens::where('idPedido', $pedido->id)->get()->keyBy('ean');
 
-        if ($data['statusCompra'] == 'devolucao_parcial') {
-            $statusAnterior = Status::where('idPedido', $pedido->id)->whereNot('status', 'devolucao_parcial')->orderBy('data', 'desc')->first();
-            
+        if ($data['statusCompra'] == 'devolucao_total') {
             foreach ($itensExistentes as $item) {
-                HistoricItens::create([
-                    'idStatus' => $statusAnterior->id,
-                    'idItem' => $item->id,
-                ]);
+                $item->delete();
             }
         }
 
-// Atualiza ou cria os itens associados ao pedido
-        foreach ($data['chaveSefaz'] as $chave) {
-            foreach ($chave['itens'] as $itemData) {
-                // Verifica se o item já existe pelo EAN e idPedido
-                if (isset($itensExistentes[$itemData['ean']])) {
-                    // Preenche o modelo existente com os novos dados
-                    $itemExistente = $itensExistentes[$itemData['ean']];
-                    $itemExistente->fill([
-                        'chaveSefaz' => $chave['id'],
-                        'descCompleta' => $itemData['descCompleta'],
-                        'ean' => $itemData['ean'],
-                        'quantProdutoUnidade' => $itemData['quantProdutoUnidade'],
-                        'quantProdutoCaixa' => $itemData['quantProdutoCaixa'],
-                        'valorProdutoUnidade' => $itemData['valorProdutoUnidade'],
-                        'valorTotalProduto' => $itemData['valorTotalProduto'],
-                    ]);
+        if ($data['statusCompra'] == 'devolucao_parcial') {
+            $statusId = Status::where('status', 'devolucao_parcial')->orderBy('data', 'desc')->first()->id;
 
-                    // Verifica se houve mudanças e salva
-                    if ($itemExistente->isDirty()) {
-                        $itemExistente->save(); // Atualiza o item existente
+            foreach ($itensExistentes as $item) {
+                HistoricItens::create([
+                    'idStatus' => $statusId,
+                    'idItem' => $item->id,
+                ]);
+
+                $item->delete();
+            }
+
+        } else {
+            // Atualiza ou cria os itens associados ao pedido
+            foreach ($data['chaveSefaz'] as $chave) {
+                foreach ($chave['itens'] as $itemData) {
+                    // Verifica se o item já existe pelo EAN e idPedido
+                    if (isset($itensExistentes[$itemData['ean']])) {
+                        // Preenche o modelo existente com os novos dados
+                        $itemExistente = $itensExistentes[$itemData['ean']];
+                        $itemExistente->fill([
+                            'chaveSefaz' => $chave['id'],
+                            'descCompleta' => $itemData['descCompleta'],
+                            'ean' => $itemData['ean'],
+                            'quantProdutoUnidade' => $itemData['quantProdutoUnidade'],
+                            'quantProdutoCaixa' => $itemData['quantProdutoCaixa'],
+                            'valorProdutoUnidade' => $itemData['valorProdutoUnidade'],
+                            'valorTotalProduto' => $itemData['valorTotalProduto'],
+                        ]);
+
+                        // Verifica se houve mudanças e salva
+                        if ($itemExistente->isDirty()) {
+                            $itemExistente->save(); // Atualiza o item existente
+                        }
+                    } else {
+                        // Se o item não existir, cria um novo
+                        Itens::create([
+                            'idPedido' => $pedido->id,
+                            'chaveSefaz' => $chave['id'],
+                            'descCompleta' => $itemData['descCompleta'],
+                            'ean' => $itemData['ean'],
+                            'quantProdutoUnidade' => $itemData['quantProdutoUnidade'],
+                            'quantProdutoCaixa' => $itemData['quantProdutoCaixa'],
+                            'valorProdutoUnidade' => $itemData['valorProdutoUnidade'],
+                            'valorTotalProduto' => $itemData['valorTotalProduto'],
+                        ]);
                     }
-                } else {
-                    // Se o item não existir, cria um novo
-                    Itens::create([
-                        'idPedido' => $pedido->id,
-                        'chaveSefaz' => $chave['id'],
-                        'descCompleta' => $itemData['descCompleta'],
-                        'ean' => $itemData['ean'],
-                        'quantProdutoUnidade' => $itemData['quantProdutoUnidade'],
-                        'quantProdutoCaixa' => $itemData['quantProdutoCaixa'],
-                        'valorProdutoUnidade' => $itemData['valorProdutoUnidade'],
-                        'valorTotalProduto' => $itemData['valorTotalProduto'],
-                    ]);
                 }
             }
         }
-
 
         // Retorna uma resposta de sucesso
         return response()->json([

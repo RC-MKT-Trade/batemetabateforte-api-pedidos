@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Itens extends Model
 {
-    use HasFactory;
+    use SoftDeletes, HasFactory;
 
     // Nome da tabela (opcional, se o nome seguir a convenção pluralizada)
     protected $table = 'itens';
