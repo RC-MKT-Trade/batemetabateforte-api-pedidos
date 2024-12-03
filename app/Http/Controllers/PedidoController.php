@@ -68,12 +68,35 @@ class PedidoController extends Controller
             ]);
             $pedido->save();
             // Salvar o status inicial do pedido
-            Status::create([
-                'idPedido' => $pedido->id,
-                'status' => $data['statusCompra'],
-                'valorTotal' => $data['valorTotalPedido'] ?? 0,
-                'data' => now(),
-            ]);
+            if ($data['statusCompra'] == 'devolucao_parcial') {
+                // pegar o valor total do pedido anterior
+                $statusAnterior = Status::where('idPedido', $pedido->id)->orderBy('data', 'desc')->first();
+                $valorTotalAnterior = $statusAnterior->valorTotal;
+
+                // percorre todos os itens enviados no payload e soma o valor dos produtos cancelados
+                $valorSomatoriaProdutosCancelados = 0;
+                foreach ($data['chaveSefaz'] as $chave) {
+                    foreach ($chave['itens'] as $itemData) {
+                        $valorSomatoriaProdutosCancelados += floatval($itemData['valorTotalProduto']);
+                    }
+                }
+
+                $valorTotal = floatval($valorTotalAnterior) - floatval(value: $valorSomatoriaProdutosCancelados);
+
+                Status::create([
+                    'idPedido' => $pedido->id,
+                    'status' => $data['statusCompra'],
+                    'valorTotal' => $valorTotal ?? 0,
+                    'data' => now(),
+                ]);
+            } else {
+                Status::create([
+                    'idPedido' => $pedido->id,
+                    'status' => $data['statusCompra'],
+                    'valorTotal' => $data['valorTotalPedido'] ?? 0,
+                    'data' => now(),
+                ]);
+            }
         } else {
             // Verifica e atualiza campos que têm dados novos
             $pedido->fill([
