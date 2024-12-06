@@ -80,7 +80,7 @@ class PedidoController extends Controller
             if ($data['statusCompra'] !== 'devolucao_parcial') {
                 $statusExiste = Status::where('status', $data['statusCompra'])->where('idPedido', $pedido->id)->exists();  
 
-                if (!$statusExiste) {
+                if ($statusExiste) {
                     return response()->json([
                         'message' => 'Status duplicado para o pedido informado',
                     ], 422);
@@ -113,7 +113,7 @@ class PedidoController extends Controller
                 ]);
             }
         }
-// Recupera todos os itens atuais associados ao pedido
+        // Recupera todos os itens atuais associados ao pedido
         $itensExistentes = Itens::where('idPedido', $pedido->id)->get()->keyBy('ean');
 
         if ($data['statusCompra'] == 'devolucao_total') {
