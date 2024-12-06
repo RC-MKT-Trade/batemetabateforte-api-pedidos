@@ -53,6 +53,16 @@ class PedidoController extends Controller
 
         // Se o pedido não existir, cria um novo
         if (!$pedido->exists) {
+            if ($data['statusCompra'] == 'devolucao_parcial') {       
+                $statusFaturado = Status::where('status', 'faturado')->where('idPedido', $pedido->id)->orderBy('data', 'desc')->first();
+
+                if (!$statusFaturado) {
+                    return response()->json([
+                        'message' => 'Pedido não possui status faturado para devolução parcial',
+                    ], 422);
+                }
+            }
+
             $pedido->fill([
                 'statusCompra' => $data['statusCompra'],
                 'codCliente' => $data['codCliente'],
