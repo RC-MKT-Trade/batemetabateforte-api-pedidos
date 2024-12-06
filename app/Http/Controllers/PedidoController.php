@@ -76,6 +76,18 @@ class PedidoController extends Controller
             ]);
             
         } else {
+
+            if ($data['statusCompra'] !== 'devolucao_parcial') {
+                $statusExiste = Status::where('status', $data['statusCompra'])->where('idPedido', $pedido->id)->exists();  
+
+                if (!$statusExiste) {
+                    return response()->json([
+                        'message' => 'Status duplicado para o pedido informado',
+                    ], 422);
+                }
+            }
+
+            
             // Verifica e atualiza campos que têm dados novos
             $pedido->fill([
                 'statusCompra' => $data['statusCompra'],
