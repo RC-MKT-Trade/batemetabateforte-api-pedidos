@@ -136,6 +136,12 @@ class PedidoController extends Controller
             
             $statusFaturado = Status::where('status', 'faturado')->where('idPedido', $pedido->id)->orderBy('data', 'desc')->first();
 
+            if (!$statusFaturado) {
+                return response()->json([
+                    'message' => 'Pedido não possui status faturado para devolução parcial',
+                ], 422);
+            }
+
             $valorTotalSaldo = floatval($statusFaturado->valorTotal) - floatval($data['valorTotalPedido']);
 
             Status::create([
